@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My GitHub Projects</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and ethical hacker theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark charcoal background */
+            color: #e2e8f0; /* Light gray text for contrast */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Subtle tech pattern background */
+            background-image:
+                radial-gradient(circle at 1px 1px, #2d3748 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, #2d3748 1px, transparent 0);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d3748; /* Darker track */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568; /* Medium gray thumb */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* Lighter gray on hover */
+        }
+
+        /* Styles for the Aditya message in the footer (no hover effect needed) */
+        .aditya-message-footer {
+            /* Basic styling for visibility */
+            background-color: #2d3748; /* Slightly lighter than body background */
+            border: 1px solid #4a5568; /* Subtle border */
+            color: #a0aec0; /* Lighter text for readability */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <header class="w-full max-w-4xl text-center mb-12">
+        <h1 class="text-5xl sm:text-6xl font-extrabold text-green-400 mb-4 tracking-tight cursor-pointer">
+            My Projects
+        </h1>
+        <a href="https://github.com/appmakervishal" target="_blank" rel="noopener noreferrer"
+           class="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md
+                  hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                  transition duration-300 ease-in-out text-lg">
+            My GitHub Profile
+        </a>
+    </header>
+
+    <!-- Message Box (for errors/info) -->
+    <section class="w-full max-w-md bg-gray-800 p-6 rounded-xl shadow-lg mb-8 hidden" id="messageBoxContainer">
+        <div id="messageBox" class="text-center text-red-600 font-medium"></div>
+    </section>
+
+    <!-- Repositories Display Section -->
+    <main class="w-full max-w-5xl px-4">
+        <div id="repositoriesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Repository cards will be injected here by JavaScript -->
+            <div id="loadingIndicator" class="col-span-full text-center text-green-400 text-xl py-10">
+                Loading projects...
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full max-w-4xl text-center mt-16 py-6 border-t border-gray-700 text-gray-400">
+        <p>&copy; 2024 appmakervishal. All rights reserved.</p>
+        <p class="mt-2 mb-4">Built with GitHub API and Tailwind CSS.</p>
+
+        <!-- Aditya's Message moved to Footer -->
+        <div id="adityaMessage" class="aditya-message-footer mx-auto mt-6 p-4 sm:p-6 rounded-lg shadow-md
+                    text-sm text-left max-w-2xl">
+            <p class="mb-2">
+                <strong>Hello Aditya!</strong> Hello from Vishal's project.
+                I think this could be a first visit to my website!
+            </p>
+            <p class="mb-2">
+                But I want to say this: some of these are made by AI.
+            </p>
+            <p class="mb-2">
+                If you want any information about you, I am saying to you because it is public in the world.
+                Your Adhi the son of Akila and Gopala Krishnan. And you are studying in Allen's.
+            </p>
+            <p class="mb-2 text-yellow-300">
+                <small>
+                    This information is subject to information leak of Allen's server.
+                </small>
+            </p>
+            <p class="text-base font-bold text-green-300">
+                Happy News: You have got the ownership of this website and 2.5% ownership of all Agni websites!
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript for fetching and displaying GitHub repositories
+        document.addEventListener('DOMContentLoaded', () => {
+            const repositoriesContainer = document.getElementById('repositoriesContainer');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const messageBox = document.getElementById('messageBox');
+            const messageBoxContainer = document.getElementById('messageBoxContainer');
+
+            const GITHUB_USERNAME = 'appmakervishal'; // Hardcoded GitHub username
+
+            // Function to display messages (errors, info)
+            function showMessage(message, type = 'error') {
+                messageBox.textContent = message;
+                messageBox.className = `text-center font-medium ${type === 'error' ? 'text-red-600' : 'text-green-400'}`;
+                messageBoxContainer.classList.remove('hidden');
+            }
+
+            // Function to hide messages
+            function hideMessage() {
+                messageBoxContainer.classList.add('hidden');
+            }
+
+            // Function to display loading indicator
+            function showLoading() {
+                loadingIndicator.classList.remove('hidden');
+                repositoriesContainer.innerHTML = ''; // Clear previous repos
+                hideMessage();
+            }
+
+            // Function to hide loading indicator
+            function hideLoading() {
+                loadingIndicator.classList.add('hidden');
+            }
+
+            // Function to fetch repositories from GitHub API
+            async function fetchGitHubRepos() {
+                showLoading();
+
+                try {
+                    // Fetch user data first to check if user exists
+                    const userResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
+                    if (!userResponse.ok) {
+                        if (userResponse.status === 404) {
+                            throw new Error(`GitHub user "${GITHUB_USERNAME}" not found.`);
+                        }
+                        throw new Error(`Failed to fetch user data: ${userResponse.statusText}`);
+                    }
+
+                    // Fetch repositories
+                    const reposResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
+                    if (!reposResponse.ok) {
+                        throw new Error(`Failed to fetch repositories: ${reposResponse.statusText}`);
+                    }
+
+                    const repos = await reposResponse.json();
+
+                    hideLoading();
+                    repositoriesContainer.innerHTML = ''; // Clear previous content
+
+                    if (repos.length === 0) {
+                        showMessage(`No public repositories found for "${GITHUB_USERNAME}".`, 'info');
+                        return;
+                    }
+
+                    // Sort repositories by update date (most recent first)
+                    repos.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+                    repos.forEach(repo => {
+                        const repoCard = document.createElement('div');
+                        // Apply styles similar to the showcase site's cards, adapted for dark theme
+                        repoCard.className = 'bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out flex flex-col justify-between border border-green-600';
+
+                        // Construct the live demo link
+                        let liveDemoLink = '';
+                        // Prioritize homepage field for live demo, then GitHub Pages URL
+                        if (repo.homepage && repo.homepage.startsWith('http')) {
+                            liveDemoLink = `
+                                <a href="${repo.homepage}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-block px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-md
+                                          hover:bg-green-700 transition-colors duration-300 ease-in-out">
+                                    Live Demo
+                                </a>
+                            `;
+                        } else if (repo.has_pages) {
+                            // Attempt to construct GitHub Pages URL if homepage is not explicitly set
+                            const githubPagesUrl = `https://${GITHUB_USERNAME}.github.io/${repo.name}/`;
+                            liveDemoLink = `
+                                <a href="${githubPagesUrl}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-block px-5 py-2 bg-green-600 text-white text-sm font-medium rounded-md
+                                          hover:bg-green-700 transition-colors duration-300 ease-in-out">
+                                    Live Demo
+                                </a>
+                            `;
+                        }
+
+                        repoCard.innerHTML = `
+                            <div>
+                                <h3 class="text-xl font-semibold text-green-400 mb-2">${repo.name}</h3>
+                                <p class="text-gray-300 text-sm mb-4">${repo.description || 'No description provided.'}</p>
+                            </div>
+                            <div class="mt-auto flex flex-wrap gap-3">
+                                <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-block px-5 py-2 bg-gray-700 text-white text-sm font-medium rounded-md
+                                          hover:bg-gray-600 transition-colors duration-300 ease-in-out">
+                                    View Code
+                                </a>
+                                ${liveDemoLink}
+                            </div>
+                        `;
+                        repositoriesContainer.appendChild(repoCard);
+                    });
+                    hideMessage(); // Hide any previous messages on successful fetch
+                } catch (error) {
+                    console.error('Error fetching GitHub repositories:', error);
+                    hideLoading();
+                    showMessage(`Error: ${error.message}`);
+                }
+            }
+
+            // Fetch repos on initial load
+            fetchGitHubRepos();
+        });
+    </script>
+</body>
+</html>
